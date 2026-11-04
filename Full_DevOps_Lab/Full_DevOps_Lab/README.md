@@ -34,6 +34,9 @@ Open `coverage/index.html` for a visual coverage report (locally).
 - `GET /api/patients` – list of patients (optional `?minAge=`) (DEVOPS-9)
 - `GET /api/patients/:id` – one patient, or 404
 - `POST /api/patients` – body `{ "name": "Marie", "age": 29 }` → 201 with the new patient, 400 if a field is missing or invalid
+- `GET /api/doctors` – list of doctors (optional `?specialty=`) (DEVOPS-10)
+- `GET /api/doctors/:id` – one doctor, or 404
+- `POST /api/doctors` – body `{ "name": "Dr. Julie", "specialty": "Neurology" }` → 201, or 400 if a field is missing
 
 The Postman collection for these routes is `postman/Healthcare API Postman Collection.json` (v2.1). Import it, start the API with `npm run dev`, then run the whole collection.
 
