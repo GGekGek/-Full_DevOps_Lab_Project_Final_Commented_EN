@@ -8,15 +8,17 @@
 import express from 'express'
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-import { createRequire } from 'node:module'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { errorHandler } from './utils/errorHandler.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-const require = createRequire(import.meta.url)
 
 const app = express()
+
+// Parse JSON bodies before handling requests (needed by POST routes).
+// A malformed body raises a 400 error handled by errorHandler below.
+app.use(express.json())
 
 // Simple root + health endpoints
 app.get('/', (_req, res) => res.json({ ok: true, message: 'Hello from CI/CD demo 👋' }))
@@ -28,7 +30,9 @@ if (fs.existsSync(autoDir)) {
   const files = fs.readdirSync(autoDir).filter(f => f.endsWith('.route.js'))
   for (const f of files) {
     const full = path.join(autoDir, f)
-    const mod = require(full)
+    // Dynamic import (not require) so routes share the same module instances
+    // as the rest of the app and tests, and are counted in coverage.
+    const mod = await import(pathToFileURL(full).href)
     const router = mod.default || mod
     if (router) app.use('/', router)
   }

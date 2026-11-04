@@ -1,0 +1,137 @@
+{
+  "info": {
+    "name": "Healthcare API Tests",
+    "description": "Lab 5: start the API with `npm run dev`, then run the whole collection in order. Each student adds the requests for their own route (doctors, appointments, metrics) to this file.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" }
+  ],
+  "item": [
+    {
+      "name": "Core",
+      "item": [
+        {
+          "name": "GET /health",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test(\"Status code is 200\", function () {",
+            "    pm.response.to.have.status(200);",
+            "});"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/health", "host": ["{{baseUrl}}"], "path": ["health"] } }
+        },
+        {
+          "name": "GET /version",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test(\"Status code is 200\", function () {",
+            "    pm.response.to.have.status(200);",
+            "});",
+            "pm.test(\"Version is a string\", function () {",
+            "    pm.expect(pm.response.json().version).to.be.a(\"string\");",
+            "});"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/version", "host": ["{{baseUrl}}"], "path": ["version"] } }
+        },
+        {
+          "name": "GET /info",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test(\"Status code is 200\", function () {",
+            "    pm.response.to.have.status(200);",
+            "});",
+            "pm.test(\"Info has name, version, node, uptime\", function () {",
+            "    pm.expect(pm.response.json()).to.include.all.keys(\"name\", \"version\", \"node\", \"uptime\");",
+            "});"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/info", "host": ["{{baseUrl}}"], "path": ["info"] } }
+        }
+      ]
+    },
+    {
+      "name": "Patients (DEVOPS-9)",
+      "item": [
+        {
+          "name": "GET all patients",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test(\"Status code is 200\", function () {",
+            "    pm.response.to.have.status(200);",
+            "});",
+            "pm.test(\"Response is an array\", function () {",
+            "    pm.expect(pm.response.json()).to.be.an(\"array\");",
+            "});",
+            "pm.test(\"Each patient has id, name and age\", function () {",
+            "    pm.response.json().forEach(function (p) {",
+            "        pm.expect(p).to.have.all.keys(\"id\", \"name\", \"age\");",
+            "    });",
+            "});",
+            "pm.test(\"Response time is below 500ms\", function () {",
+            "    pm.expect(pm.response.responseTime).to.be.below(500);",
+            "});"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/patients", "host": ["{{baseUrl}}"], "path": ["api", "patients"] }, "description": "Retrieve all patients" }
+        },
+        {
+          "name": "POST new patient",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test(\"Status code is 201\", function () {",
+            "    pm.response.to.have.status(201);",
+            "});",
+            "pm.test(\"New patient has an id and the sent fields\", function () {",
+            "    const body = pm.response.json();",
+            "    pm.expect(body).to.have.property(\"id\");",
+            "    pm.expect(body.name).to.eql(\"Marie\");",
+            "    pm.expect(body.age).to.eql(29);",
+            "    pm.collectionVariables.set(\"patientId\", body.id);",
+            "});"
+          ] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Marie\",\n  \"age\": 29\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/api/patients", "host": ["{{baseUrl}}"], "path": ["api", "patients"] },
+            "description": "Add a new patient"
+          }
+        },
+        {
+          "name": "GET created patient by id",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test(\"Status code is 200\", function () {",
+            "    pm.response.to.have.status(200);",
+            "});",
+            "pm.test(\"Returns the patient created above\", function () {",
+            "    pm.expect(pm.response.json().id).to.eql(Number(pm.collectionVariables.get(\"patientId\")));",
+            "});"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/patients/{{patientId}}", "host": ["{{baseUrl}}"], "path": ["api", "patients", "{{patientId}}"] } }
+        },
+        {
+          "name": "POST patient - missing fields (400)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test(\"Status code is 400\", function () {",
+            "    pm.response.to.have.status(400);",
+            "});",
+            "pm.test(\"Error message is returned\", function () {",
+            "    const body = pm.response.json();",
+            "    pm.expect(body.error).to.eql(true);",
+            "    pm.expect(body.message).to.include(\"Missing fields\");",
+            "});"
+          ] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"NoAge\"\n}", "options": { "raw": { "language": "json" } } },
+            "url": { "raw": "{{baseUrl}}/api/patients", "host": ["{{baseUrl}}"], "path": ["api", "patients"] }
+          }
+        },
+        {
+          "name": "GET unknown patient (404)",
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test(\"Status code is 404\", function () {",
+            "    pm.response.to.have.status(404);",
+            "});"
+          ] } }],
+          "request": { "method": "GET", "header": [], "url": { "raw": "{{baseUrl}}/api/patients/9999", "host": ["{{baseUrl}}"], "path": ["api", "patients", "9999"] } }
+        }
+      ]
+    }
+  ]
+}
