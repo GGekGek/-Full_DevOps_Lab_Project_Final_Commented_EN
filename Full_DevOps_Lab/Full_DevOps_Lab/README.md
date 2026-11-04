@@ -31,6 +31,13 @@ Open `coverage/index.html` for a visual coverage report (locally).
 - `GET /version` – returns `{ version }` from `package.json`
 - `GET /info` – returns `{ name, version, node, uptime }`
 - `GET /boom` – triggers an error to test the global error handler
+- `GET /api/patients` – list of patients (optional `?minAge=`) (DEVOPS-9)
+- `GET /api/patients/:id` – one patient, or 404
+- `POST /api/patients` – body `{ "name": "Marie", "age": 29 }` → 201 with the new patient, 400 if a field is missing or invalid
+
+The Postman collection for these routes is `postman/Healthcare API Postman Collection.json` (v2.1). Import it, start the API with `npm run dev`, then run the whole collection.
+
+Lab 5 JavaScript exercises are in `js-practice.js`, plus `hospitalData.js` and `main.js` (run with `node js-practice.js` and `node main.js`).
 
 Routes are **auto-mounted** from `src/routes/auto/*.route.js` so each student can add a file without touching `src/app.js` (fewer merge conflicts).
 
