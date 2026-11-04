@@ -605,6 +605,51 @@
           }
         }
       ]
+    },
+    {
+      "name": "Metrics (DEVOPS-12)",
+      "item": [
+        {
+          "name": "GET metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Metrics contain status, uptime and hospital counts\", function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect([\"warming-up\", \"healthy\", \"steady\"]).to.include(body.status);",
+                  "    pm.expect(body.uptimeSeconds).to.be.a(\"number\");",
+                  "    pm.expect(body.hospital).to.have.all.keys(\"doctors\", \"patients\", \"appointments\");",
+                  "});",
+                  "pm.test(\"Response time is below 500ms\", function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(500);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/metrics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "metrics"
+              ]
+            },
+            "description": "Return system and hospital stats"
+          }
+        }
+      ]
     }
   ]
 }
