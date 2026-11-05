@@ -31,6 +31,20 @@ Open `coverage/index.html` for a visual coverage report (locally).
 - `GET /version` – returns `{ version }` from `package.json`
 - `GET /info` – returns `{ name, version, node, uptime }`
 - `GET /boom` – triggers an error to test the global error handler
+
+### Internship Application API (Jira project SCRUM)
+
+Every entity exposes the same CRUD pattern: `GET /api/<entity>`, `GET /api/<entity>/:id`, `POST`, `PUT /:id` (partial update) and `DELETE /:id`. Errors are `{ error: true, message }` with 400 (invalid body), 404 (unknown id) or 409 (conflict).
+
+| Entity | Route | Epic | Extra |
+|---|---|---|---|
+| Student | `/api/students` | SCRUM-6 Student Profile Management (SCRUM-39) | filters `?program=`, `?skill=`; 409 if the email is already used |
+| Company | `/api/companies` | SCRUM-11 Company Management (SCRUM-40) | filter `?city=` |
+
+The Postman collection is `postman/Internship Application API.postman_collection.json` (v2.1).
+
+### Hospital example (first lab sessions)
+
 - `GET /api/patients` – list of patients (optional `?minAge=`) (DEVOPS-9)
 - `GET /api/patients/:id` – one patient, or 404
 - `POST /api/patients` – body `{ "name": "Marie", "age": 29 }` → 201 with the new patient, 400 if a field is missing or invalid
