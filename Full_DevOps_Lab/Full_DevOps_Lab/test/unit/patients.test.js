@@ -3,8 +3,42 @@
  */
 import { describe, it, expect, beforeEach } from 'vitest'
 import {
-  resetPatients, listPatients, findPatient, validatePatient, addPatient
+  resetPatients, listPatients, findPatient, validatePatient, addPatient,
+  validatePatientUpdate, updatePatient, deletePatient
 } from '../../src/utils/patients.js'
+
+describe('validatePatientUpdate', () => {
+  it('requires at least one field', () => {
+    expect(validatePatientUpdate(undefined)).toMatch(/at least one field/)
+    expect(validatePatientUpdate({})).toMatch(/at least one field/)
+  })
+  it('rejects an invalid name or age', () => {
+    expect(validatePatientUpdate({ name: ' ' })).toBe('name must be a non-empty string')
+    expect(validatePatientUpdate({ age: -1 })).toMatch(/age must be/)
+    expect(validatePatientUpdate({ age: '30' })).toMatch(/age must be/)
+  })
+  it('accepts a single valid field', () => {
+    expect(validatePatientUpdate({ age: 0 })).toBeNull()
+    expect(validatePatientUpdate({ name: 'Bob' })).toBeNull()
+  })
+})
+
+describe('updatePatient / deletePatient', () => {
+  beforeEach(() => resetPatients())
+
+  it('updates only the given fields', () => {
+    expect(updatePatient(1, { age: 31 })).toEqual({ id: 1, name: 'Alice', age: 31 })
+    expect(updatePatient('1', { name: ' Alice M. ' }).name).toBe('Alice M.')
+  })
+  it('returns undefined when updating an unknown patient', () => {
+    expect(updatePatient(42, { age: 1 })).toBeUndefined()
+  })
+  it('deletes an existing patient only', () => {
+    expect(deletePatient(2)).toBe(true)
+    expect(findPatient(2)).toBeUndefined()
+    expect(deletePatient(2)).toBe(false)
+  })
+})
 
 describe('validatePatient', () => {
   it('rejects a missing body', () => {
