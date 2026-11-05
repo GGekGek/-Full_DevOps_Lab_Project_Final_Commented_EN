@@ -1,7 +1,8 @@
 /**
- * GET /api/metrics → system and hospital stats (DEVOPS-12).
+ * GET /api/metrics → system and platform stats (DEVOPS-12, adapted in SCRUM-43).
  * Returns: { status, uptimeSeconds, memoryMB, node, timestamp,
- *            hospital: { doctors, patients, appointments } }
+ *            platform: { students, studentsWithoutInternship, companies,
+ *                        offers: { open, closed }, applications: { pending, accepted, rejected } } }
  */
 import { Router } from 'express'
 import { getMetrics } from '../../utils/metrics.js'

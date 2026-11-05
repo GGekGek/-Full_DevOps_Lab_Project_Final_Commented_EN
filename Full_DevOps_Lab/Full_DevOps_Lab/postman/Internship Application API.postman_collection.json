@@ -2044,6 +2044,165 @@
           }
         }
       ]
+    },
+    {
+      "name": "Monitoring & metrics (SCRUM-43)",
+      "item": [
+        {
+          "name": "GET students internship status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response body is correct\", function () {",
+                  "    const json = pm.response.json();",
+                  "    json.forEach(s => pm.expect(['placed', 'applying', 'searching']).to.include(s.internshipStatus));",
+                  "    const nora = json.find(s => s.studentId === Number(pm.collectionVariables.get('studentId')));",
+                  "    pm.expect(nora.internshipStatus).to.eql('placed');",
+                  "    pm.expect(nora.internship.companyName).to.eql('GreenGrid');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/monitoring/students",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "monitoring",
+                "students"
+              ]
+            },
+            "description": "SCRUM-30 – school staff view students and their internship status"
+          }
+        },
+        {
+          "name": "GET students without internship",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response body is correct\", function () {",
+                  "    const json = pm.response.json();",
+                  "    json.forEach(s => { pm.expect(s.internshipStatus).to.eql('searching'); pm.expect(s.internship).to.eql(null); });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/monitoring/students?status=searching",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "monitoring",
+                "students"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "searching"
+                }
+              ]
+            },
+            "description": "SCRUM-31 – identify students without an internship"
+          }
+        },
+        {
+          "name": "GET monitoring - invalid status (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/monitoring/students?status=hired",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "monitoring",
+                "students"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "hired"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET metrics",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Response body is correct\", function () {",
+                  "    const json = pm.response.json();",
+                  "    pm.expect(['warming-up', 'healthy', 'steady']).to.include(json.status);",
+                  "    pm.expect(json.platform).to.have.all.keys('students', 'studentsWithoutInternship', 'companies', 'offers', 'applications');",
+                  "    pm.expect(json.platform.applications).to.have.all.keys('pending', 'accepted', 'rejected');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/metrics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "metrics"
+              ]
+            }
+          }
+        }
+      ]
     }
   ]
 }
