@@ -39,6 +39,7 @@ Every entity exposes the same CRUD pattern: `GET /api/<entity>`, `GET /api/<enti
 | Entity | Route | Epic | Extra |
 |---|---|---|---|
 | Student | `/api/students` | SCRUM-6 Student Profile Management (SCRUM-39) | filters `?program=`, `?skill=`; 409 if the email is already used |
+| Company | `/api/companies` | SCRUM-11 Company Management (SCRUM-40) | filter `?city=` |
 
 The Postman collection is `postman/Internship Application API.postman_collection.json` (v2.1).
 
