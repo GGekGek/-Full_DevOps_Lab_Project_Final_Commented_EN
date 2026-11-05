@@ -25,6 +25,17 @@ export function listAppointments () {
   }))
 }
 
+/**
+ * True when at least one appointment matches the given doctorId or patientId.
+ * Used to refuse deleting a doctor/patient that is still booked (409).
+ */
+export function hasAppointments ({ doctorId, patientId }) {
+  return appointments.some(a =>
+    (doctorId !== undefined && a.doctorId === Number(doctorId)) ||
+    (patientId !== undefined && a.patientId === Number(patientId))
+  )
+}
+
 function httpError (status, message) {
   const err = new Error(message)
   err.status = status
