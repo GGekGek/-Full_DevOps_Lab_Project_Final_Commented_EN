@@ -43,6 +43,9 @@ Open `coverage/index.html` for a visual coverage report (locally).
 - `DELETE /api/doctors/:id` – 204; 404 if unknown; 409 if the doctor still has appointments
 - `GET /api/appointments` – appointments with doctor and patient names (DEVOPS-11)
 - `POST /api/appointments` – body `{ "doctorId": 1, "patientId": 1, "date": "2026-12-15T10:30:00Z" }` → 201; 400 if a field is missing or the date is invalid; 404 if the doctor or patient does not exist
+- `GET /api/appointments/:id` – one appointment with names, or 404 (DEVOPS-16)
+- `PUT /api/appointments/:id` – partial update of `doctorId`, `patientId` and/or `date` → 200; 400 if no field or invalid date; 404 if the appointment, doctor or patient does not exist
+- `DELETE /api/appointments/:id` – 204; 404 if unknown
 - `GET /api/metrics` – status label (`formatStatus`), uptime, memory, Node version and hospital counts (DEVOPS-12)
 
 The Postman collection for these routes is `postman/Healthcare API Postman Collection.json` (v2.1). Import it, start the API with `npm run dev`, then run the whole collection.

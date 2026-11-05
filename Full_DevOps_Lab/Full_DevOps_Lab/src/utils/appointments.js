@@ -1,9 +1,10 @@
 /**
- * Appointment store + creation logic used by /api/appointments (DEVOPS-11).
+ * Appointment store + CRUD logic used by /api/appointments (DEVOPS-11, DEVOPS-16).
  * An appointment links an existing doctor and an existing patient at a date.
  */
 import { findDoctor } from './doctors.js'
 import { findPatient } from './patients.js'
+import { httpError } from './errorHandler.js'
 
 const SEED = [
   { id: 1, doctorId: 1, patientId: 1, date: '2026-12-01T09:00:00.000Z' }
@@ -36,10 +37,40 @@ export function hasAppointments ({ doctorId, patientId }) {
   )
 }
 
-function httpError (status, message) {
-  const err = new Error(message)
-  err.status = status
-  return err
+/** One appointment with names resolved, or undefined. */
+export function findAppointment (id) {
+  return listAppointments().find(a => a.id === Number(id))
+}
+
+/**
+ * Applies a partial update (PUT) after validating it.
+ * Throws an Error with .status 404 (unknown appointment / doctor / patient)
+ * or 400 (no field to update / invalid date).
+ */
+export function updateAppointment (id, body) {
+  const appointment = appointments.find(a => a.id === Number(id))
+  if (!appointment) throw httpError(404, 'Appointment not found')
+
+  const { doctorId, patientId, date } = body ?? {}
+  if (doctorId === undefined && patientId === undefined && date === undefined) {
+    throw httpError(400, 'Provide at least one field to update: doctorId, patientId, date')
+  }
+  if (date !== undefined && Number.isNaN(Date.parse(date))) throw httpError(400, 'date must be a valid date')
+  if (doctorId !== undefined && !findDoctor(doctorId)) throw httpError(404, 'Doctor not found')
+  if (patientId !== undefined && !findPatient(patientId)) throw httpError(404, 'Patient not found')
+
+  if (doctorId !== undefined) appointment.doctorId = Number(doctorId)
+  if (patientId !== undefined) appointment.patientId = Number(patientId)
+  if (date !== undefined) appointment.date = new Date(date).toISOString()
+  return appointment
+}
+
+/** Removes an appointment. Returns true if it existed. */
+export function deleteAppointment (id) {
+  const index = appointments.findIndex(a => a.id === Number(id))
+  if (index === -1) return false
+  appointments.splice(index, 1)
+  return true
 }
 
 /**
