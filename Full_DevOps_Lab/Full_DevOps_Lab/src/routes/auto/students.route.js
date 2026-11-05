@@ -4,13 +4,14 @@
  *  GET    /api/students/:id    → 200 | 404
  *  POST   /api/students        → 201 | 400 invalid body | 409 email already used
  *  PUT    /api/students/:id    → 200 | 400 | 404 | 409   (profile, skills, CV)
- *  DELETE /api/students/:id    → 204 | 404
+ *  DELETE /api/students/:id    → 204 | 404 | 409 student still has applications (SCRUM-42)
  */
 import { Router } from 'express'
 import {
   listStudents, findStudent, validateStudent, emailTaken,
   addStudent, updateStudent, deleteStudent
 } from '../../utils/students.js'
+import { studentHasApplications } from '../../utils/applications.js'
 import { httpError } from '../../utils/errorHandler.js'
 
 const router = Router()
@@ -44,7 +45,11 @@ router.put('/api/students/:id', (req, res, next) => {
 })
 
 router.delete('/api/students/:id', (req, res, next) => {
-  if (!deleteStudent(req.params.id)) return next(httpError(404, 'Student not found'))
+  if (!findStudent(req.params.id)) return next(httpError(404, 'Student not found'))
+  if (studentHasApplications(req.params.id)) {
+    return next(httpError(409, 'Student still has applications; withdraw them first'))
+  }
+  deleteStudent(req.params.id)
   res.status(204).end()
 })
 

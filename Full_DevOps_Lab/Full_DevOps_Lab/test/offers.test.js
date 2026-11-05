@@ -87,9 +87,13 @@ describe('/api/companies/:id/offers and company deletion', () => {
   })
 
   it('refuses to delete a company that still has offers (409)', async () => {
-    const res = await request(app).delete('/api/companies/2')
-    expect(res.status).toBe(409)
-    await request(app).delete('/api/offers/2')
-    expect((await request(app).delete('/api/companies/2')).status).toBe(204)
+    expect((await request(app).delete('/api/companies/2')).status).toBe(409)
+
+    const company = await request(app).post('/api/companies')
+      .send({ name: 'Tmp', sector: 'X', city: 'Paris', contactEmail: 'tmp@x.fr' })
+    const offer = await request(app).post('/api/offers').send({ ...newOffer, companyId: company.body.id })
+    expect((await request(app).delete(`/api/companies/${company.body.id}`)).status).toBe(409)
+    await request(app).delete(`/api/offers/${offer.body.id}`)
+    expect((await request(app).delete(`/api/companies/${company.body.id}`)).status).toBe(204)
   })
 })

@@ -38,9 +38,10 @@ Every entity exposes the same CRUD pattern: `GET /api/<entity>`, `GET /api/<enti
 
 | Entity | Route | Epic | Extra |
 |---|---|---|---|
-| Student | `/api/students` | SCRUM-6 Student Profile Management (SCRUM-39) | filters `?program=`, `?skill=`; 409 if the email is already used |
+| Student | `/api/students` | SCRUM-6 Student Profile Management (SCRUM-39) | filters `?program=`, `?skill=`; 409 if the email is already used or (on delete) while it has applications |
 | Company | `/api/companies` | SCRUM-11 Company Management (SCRUM-40) | filter `?city=`; `GET /api/companies/:id/offers`; 409 on delete while it has offers |
-| Offer | `/api/offers` | SCRUM-7 Internship Offer Management (SCRUM-41) | search `?q=`, filters `?location=`, `?field=`, `?status=`, `?companyId=`; 404 if the company does not exist |
+| Offer | `/api/offers` | SCRUM-7 Internship Offer Management (SCRUM-41) | search `?q=`, filters `?location=`, `?field=`, `?status=`, `?companyId=`; 404 if the company does not exist; 409 on delete while it has applications |
+| Application | `/api/applications` | SCRUM-8 Application Management (SCRUM-42) | filters `?studentId=`, `?offerId=`, `?companyId=`, `?status=`; POST starts as `pending`, 409 if the offer is closed or the student already applied; PUT changes `status` (pending / accepted / rejected) or `message` |
 
 The Postman collection is `postman/Internship Application API.postman_collection.json` (v2.1).
 
