@@ -39,6 +39,35 @@ export function validatePatient (body) {
   return null
 }
 
+/**
+ * Validates a partial update (PUT). Returns an error message or null.
+ * At least one of name / age must be sent, and each sent field must be valid.
+ */
+export function validatePatientUpdate (body) {
+  const { name, age } = body ?? {}
+  if (name === undefined && age === undefined) return 'Provide at least one field to update: name, age'
+  if (name !== undefined && (typeof name !== 'string' || name.trim() === '')) return 'name must be a non-empty string'
+  if (age !== undefined && (!Number.isInteger(age) || age < 0 || age > 150)) return 'age must be an integer between 0 and 150'
+  return null
+}
+
+/** Applies a (validated) partial update. Returns the patient, or undefined if not found. */
+export function updatePatient (id, { name, age }) {
+  const patient = findPatient(id)
+  if (!patient) return undefined
+  if (name !== undefined) patient.name = name.trim()
+  if (age !== undefined) patient.age = age
+  return patient
+}
+
+/** Removes a patient. Returns true if it existed. */
+export function deletePatient (id) {
+  const index = patients.findIndex(p => p.id === Number(id))
+  if (index === -1) return false
+  patients.splice(index, 1)
+  return true
+}
+
 /** Adds a patient and returns it with its new id (highest id + 1). */
 export function addPatient ({ name, age }) {
   const id = Math.max(0, ...patients.map(p => p.id)) + 1

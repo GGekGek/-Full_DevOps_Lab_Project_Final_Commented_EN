@@ -6,9 +6,56 @@ import request from 'supertest'
 import app from '../src/app.js'
 import { describe, it, expect, beforeEach } from 'vitest'
 import { resetPatients } from '../src/utils/patients.js'
+import { resetAppointments } from '../src/utils/appointments.js'
 
 describe('/api/patients', () => {
-  beforeEach(() => resetPatients())
+  beforeEach(() => {
+    resetPatients()
+    resetAppointments()
+  })
+
+  // ----- PUT (DEVOPS-15) -----
+  it('PUT /:id updates only the fields sent', async () => {
+    const res = await request(app).put('/api/patients/2').send({ age: 46 })
+    expect(res.status).toBe(200)
+    expect(res.body).toEqual({ id: 2, name: 'John', age: 46 })
+  })
+
+  it('PUT /:id returns 404 for an unknown patient', async () => {
+    const res = await request(app).put('/api/patients/999').send({ age: 20 })
+    expect(res.status).toBe(404)
+    expect(res.body.message).toBe('Patient not found')
+  })
+
+  it('PUT /:id with no valid field returns 400', async () => {
+    const res = await request(app).put('/api/patients/1').send({ city: 'Paris' })
+    expect(res.status).toBe(400)
+    expect(res.body.message).toMatch(/at least one field/)
+  })
+
+  it('PUT /:id with an invalid age returns 400', async () => {
+    const res = await request(app).put('/api/patients/1').send({ age: 200 })
+    expect(res.status).toBe(400)
+  })
+
+  // ----- DELETE (DEVOPS-15) -----
+  it('DELETE /:id removes a patient without appointments (204)', async () => {
+    const res = await request(app).delete('/api/patients/2')
+    expect(res.status).toBe(204)
+    const check = await request(app).get('/api/patients/2')
+    expect(check.status).toBe(404)
+  })
+
+  it('DELETE /:id returns 404 for an unknown patient', async () => {
+    const res = await request(app).delete('/api/patients/999')
+    expect(res.status).toBe(404)
+  })
+
+  it('DELETE /:id returns 409 when the patient still has appointments', async () => {
+    const res = await request(app).delete('/api/patients/1')
+    expect(res.status).toBe(409)
+    expect(res.body.message).toMatch(/still has appointments/)
+  })
 
   it('GET returns the list of patients', async () => {
     const res = await request(app).get('/api/patients')

@@ -34,6 +34,8 @@ Open `coverage/index.html` for a visual coverage report (locally).
 - `GET /api/patients` – list of patients (optional `?minAge=`) (DEVOPS-9)
 - `GET /api/patients/:id` – one patient, or 404
 - `POST /api/patients` – body `{ "name": "Marie", "age": 29 }` → 201 with the new patient, 400 if a field is missing or invalid
+- `PUT /api/patients/:id` – partial update, e.g. `{ "age": 30 }` → 200; 400 if no valid field; 404 if unknown (DEVOPS-15)
+- `DELETE /api/patients/:id` – 204; 404 if unknown; 409 if the patient still has appointments
 - `GET /api/doctors` – list of doctors (optional `?specialty=`) (DEVOPS-10)
 - `GET /api/doctors/:id` – one doctor, or 404
 - `POST /api/doctors` – body `{ "name": "Dr. Julie", "specialty": "Neurology" }` → 201, or 400 if a field is missing
