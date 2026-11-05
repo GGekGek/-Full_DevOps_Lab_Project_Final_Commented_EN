@@ -4,13 +4,15 @@
  *  GET    /api/companies/:id    → 200 | 404
  *  POST   /api/companies        → 201 | 400 invalid body
  *  PUT    /api/companies/:id    → 200 | 400 | 404   (company info, contacts)
- *  DELETE /api/companies/:id    → 204 | 404
+ *  DELETE /api/companies/:id    → 204 | 404 | 409 company still has offers (SCRUM-41)
+ *  GET    /api/companies/:id/offers → 200 offers of this company (SCRUM-34) | 404
  */
 import { Router } from 'express'
 import {
   listCompanies, findCompany, validateCompany,
   addCompany, updateCompany, deleteCompany
 } from '../../utils/companies.js'
+import { listOffers, companyHasOffers } from '../../utils/offers.js'
 import { httpError } from '../../utils/errorHandler.js'
 
 const router = Router()
@@ -38,8 +40,16 @@ router.put('/api/companies/:id', (req, res, next) => {
   res.status(200).json(updateCompany(req.params.id, req.body))
 })
 
+router.get('/api/companies/:id/offers', (req, res, next) => {
+  if (!findCompany(req.params.id)) return next(httpError(404, 'Company not found'))
+  res.status(200).json(listOffers({ companyId: req.params.id }))
+})
+
 router.delete('/api/companies/:id', (req, res, next) => {
   if (!findCompany(req.params.id)) return next(httpError(404, 'Company not found'))
+  if (companyHasOffers(req.params.id)) {
+    return next(httpError(409, 'Company still has internship offers; delete them first'))
+  }
   deleteCompany(req.params.id)
   res.status(204).end()
 })
