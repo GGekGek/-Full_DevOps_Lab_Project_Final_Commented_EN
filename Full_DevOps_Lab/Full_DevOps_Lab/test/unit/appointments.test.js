@@ -3,7 +3,8 @@
  */
 import { describe, it, expect, beforeEach } from 'vitest'
 import {
-  resetAppointments, listAppointments, createAppointment
+  resetAppointments, listAppointments, createAppointment,
+  findAppointment, updateAppointment, deleteAppointment
 } from '../../src/utils/appointments.js'
 import { resetDoctors, addDoctor } from '../../src/utils/doctors.js'
 
@@ -38,6 +39,26 @@ describe('appointments', () => {
     const a = createAppointment({ doctorId: '2', patientId: '2', date: '2026-12-20' })
     expect(a).toEqual({ id: 2, doctorId: 2, patientId: 2, date: '2026-12-20T00:00:00.000Z' })
     expect(listAppointments()).toHaveLength(2)
+  })
+
+  it('finds an appointment by id with names (DEVOPS-16)', () => {
+    expect(findAppointment('1')).toMatchObject({ id: 1, doctor: 'Dr. Sarah Lee', patient: 'Alice' })
+    expect(findAppointment(42)).toBeUndefined()
+  })
+
+  it('updates only the given fields and validates them (DEVOPS-16)', () => {
+    expect(updateAppointment(1, { patientId: '2' })).toMatchObject({ id: 1, doctorId: 1, patientId: 2 })
+    expect(errorOf(() => updateAppointment(42, { date: '2026-12-01' })).status).toBe(404)
+    expect(errorOf(() => updateAppointment(1, undefined)).status).toBe(400)
+    expect(errorOf(() => updateAppointment(1, { date: 'x' })).status).toBe(400)
+    expect(errorOf(() => updateAppointment(1, { doctorId: 99 })).message).toBe('Doctor not found')
+    expect(errorOf(() => updateAppointment(1, { patientId: 99 })).message).toBe('Patient not found')
+  })
+
+  it('deletes an existing appointment only (DEVOPS-16)', () => {
+    expect(deleteAppointment(1)).toBe(true)
+    expect(listAppointments()).toHaveLength(0)
+    expect(deleteAppointment(1)).toBe(false)
   })
 
   it('returns a null doctor name when the doctor no longer exists', () => {
