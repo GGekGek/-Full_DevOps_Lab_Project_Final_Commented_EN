@@ -42,29 +42,12 @@ Every entity exposes the same CRUD pattern: `GET /api/<entity>`, `GET /api/<enti
 | Company | `/api/companies` | SCRUM-11 Company Management (SCRUM-40) | filter `?city=`; `GET /api/companies/:id/offers`; 409 on delete while it has offers |
 | Offer | `/api/offers` | SCRUM-7 Internship Offer Management (SCRUM-41) | search `?q=`, filters `?location=`, `?field=`, `?status=`, `?companyId=`; 404 if the company does not exist; 409 on delete while it has applications |
 | Application | `/api/applications` | SCRUM-8 Application Management (SCRUM-42) | filters `?studentId=`, `?offerId=`, `?companyId=`, `?status=`; POST starts as `pending`, 409 if the offer is closed or the student already applied; PUT changes `status` (pending / accepted / rejected) or `message` |
+| Monitoring | `GET /api/monitoring/students` | SCRUM-10 School Monitoring (SCRUM-43) | read-only; `internshipStatus` = placed / applying / searching, computed from the applications; `?status=searching` lists students without an internship; `?program=` |
+| Metrics | `GET /api/metrics` | (DEVOPS-12, adapted in SCRUM-43) | uptime status + counts of students, students without internship, companies, offers and applications |
 
-The Postman collection is `postman/Internship Application API.postman_collection.json` (v2.1).
+The Postman collection is `postman/Internship Application API.postman_collection.json` (v2.1). Import it, start the API with `npm run dev`, then run the whole collection (in order: later requests reuse the ids created earlier).
 
-### Hospital example (first lab sessions)
-
-- `GET /api/patients` – list of patients (optional `?minAge=`) (DEVOPS-9)
-- `GET /api/patients/:id` – one patient, or 404
-- `POST /api/patients` – body `{ "name": "Marie", "age": 29 }` → 201 with the new patient, 400 if a field is missing or invalid
-- `PUT /api/patients/:id` – partial update, e.g. `{ "age": 30 }` → 200; 400 if no valid field; 404 if unknown (DEVOPS-15)
-- `DELETE /api/patients/:id` – 204; 404 if unknown; 409 if the patient still has appointments
-- `GET /api/doctors` – list of doctors (optional `?specialty=`) (DEVOPS-10)
-- `GET /api/doctors/:id` – one doctor, or 404
-- `POST /api/doctors` – body `{ "name": "Dr. Julie", "specialty": "Neurology" }` → 201, or 400 if a field is missing
-- `PUT /api/doctors/:id` – partial update, e.g. `{ "specialty": "Neurosurgery" }` → 200; 400 if no valid field; 404 if unknown (DEVOPS-14)
-- `DELETE /api/doctors/:id` – 204; 404 if unknown; 409 if the doctor still has appointments
-- `GET /api/appointments` – appointments with doctor and patient names (DEVOPS-11)
-- `POST /api/appointments` – body `{ "doctorId": 1, "patientId": 1, "date": "2026-12-15T10:30:00Z" }` → 201; 400 if a field is missing or the date is invalid; 404 if the doctor or patient does not exist
-- `GET /api/appointments/:id` – one appointment with names, or 404 (DEVOPS-16)
-- `PUT /api/appointments/:id` – partial update of `doctorId`, `patientId` and/or `date` → 200; 400 if no field or invalid date; 404 if the appointment, doctor or patient does not exist
-- `DELETE /api/appointments/:id` – 204; 404 if unknown
-- `GET /api/metrics` – status label (`formatStatus`), uptime, memory, Node version and hospital counts (DEVOPS-12)
-
-The Postman collection for these routes is `postman/Healthcare API Postman Collection.json` (v2.1). Import it, start the API with `npm run dev`, then run the whole collection.
+The hospital example (doctors, patients, appointments) used in the first lab sessions was replaced by this API in SCRUM-43; it remains in the git history (DEVOPS-9 to DEVOPS-16).
 
 Lab 5 JavaScript exercises are in `js-practice.js`, plus `hospitalData.js` and `main.js` (run with `node js-practice.js` and `node main.js`).
 

@@ -3,15 +3,17 @@
  */
 import { describe, it, expect, beforeEach } from 'vitest'
 import { getMetrics } from '../../src/utils/metrics.js'
-import { resetDoctors } from '../../src/utils/doctors.js'
-import { resetPatients } from '../../src/utils/patients.js'
-import { resetAppointments } from '../../src/utils/appointments.js'
+import { resetStudents } from '../../src/utils/students.js'
+import { resetCompanies } from '../../src/utils/companies.js'
+import { resetOffers } from '../../src/utils/offers.js'
+import { resetApplications } from '../../src/utils/applications.js'
 
 describe('getMetrics', () => {
   beforeEach(() => {
-    resetDoctors()
-    resetPatients()
-    resetAppointments()
+    resetStudents()
+    resetCompanies()
+    resetOffers()
+    resetApplications()
   })
 
   it('labels the status from the uptime (formatStatus)', () => {
@@ -26,8 +28,14 @@ describe('getMetrics', () => {
     expect(m.timestamp).toBe('2026-11-04T12:00:00.000Z')
   })
 
-  it('counts doctors, patients and appointments', () => {
-    expect(getMetrics(1).hospital).toEqual({ doctors: 2, patients: 2, appointments: 1 })
+  it('counts students, companies, offers and applications (SCRUM-43)', () => {
+    expect(getMetrics(1).platform).toEqual({
+      students: 3,
+      studentsWithoutInternship: 1,
+      companies: 2,
+      offers: { open: 2, closed: 1 },
+      applications: { pending: 1, accepted: 1, rejected: 0 }
+    })
   })
 
   it('uses the real process uptime by default', () => {
