@@ -4,7 +4,7 @@
  *  GET    /api/offers/:id       → 200 | 404
  *  POST   /api/offers           → 201 | 400 invalid body | 404 unknown company
  *  PUT    /api/offers/:id       → 200 | 400 | 404   (edit, or close with { "status": "closed" })
- *  DELETE /api/offers/:id       → 204 | 404
+ *  DELETE /api/offers/:id       → 204 | 404 | 409 offer still has applications (SCRUM-42)
  * Every offer is returned with its companyName.
  */
 import { Router } from 'express'
@@ -13,6 +13,7 @@ import {
   addOffer, updateOffer, deleteOffer
 } from '../../utils/offers.js'
 import { findCompany } from '../../utils/companies.js'
+import { offerHasApplications } from '../../utils/applications.js'
 import { httpError } from '../../utils/errorHandler.js'
 
 const router = Router()
@@ -46,7 +47,11 @@ router.put('/api/offers/:id', (req, res, next) => {
 })
 
 router.delete('/api/offers/:id', (req, res, next) => {
-  if (!deleteOffer(req.params.id)) return next(httpError(404, 'Offer not found'))
+  if (!findOffer(req.params.id)) return next(httpError(404, 'Offer not found'))
+  if (offerHasApplications(req.params.id)) {
+    return next(httpError(409, 'Offer still has applications; close it instead'))
+  }
+  deleteOffer(req.params.id)
   res.status(204).end()
 })
 
